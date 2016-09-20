@@ -1259,7 +1259,7 @@ PyObject *Connection_query(Connection *self, PyObject *args)
     escapedQuery = query;
   }
 
-  ret =  UMConnection_Query(self->conn, PyUnicode_AS_UNICODE(escapedQuery), PyUnicode_GET_SIZE(escapedQuery));
+  ret =  UMConnection_Query(self->conn, PyUnicode_AsUTF8(escapedQuery), PyUnicode_GET_SIZE(escapedQuery));
 
   Py_DECREF(escapedQuery);
 
