@@ -227,9 +227,9 @@ int API_recvSocket(void *sock, char *buffer, int cbBuffer)
   funcStr = PyUnicode_FromString("recv");
   bufSize = PyLong_FromLong(cbBuffer);
 
-  printf("In Socket Receive:\n");
-  printf("Buffer: %s\n", buffer);
-  printf("Buffer Size: %d\n", cbBuffer);
+  // printf("In Socket Receive:\n");
+  // printf("Buffer: %s\n", buffer);
+  // printf("Buffer Size: %d\n", cbBuffer);
 
   res = PyObject_CallMethodObjArgs((PyObject *) sock, funcStr, bufSize, NULL);
 
@@ -242,7 +242,6 @@ int API_recvSocket(void *sock, char *buffer, int cbBuffer)
   }
 
   ret = (int) PyBytes_GET_SIZE(res);
-  printf("Size of res = %d\n", ret);
   memcpy (buffer, PyBytes_AsString(res), ret);
   Py_DECREF(res);
   return ret;
@@ -255,9 +254,9 @@ int API_sendSocket(void *sock, const char *buffer, int cbBuffer)
   PyObject *funcStr;
   int ret;
 
-  printf("In Socket Send\n");
-  printf("Buffer = %s\n", buffer);
-  printf("Buffer Size = %d\n", cbBuffer);
+  // printf("In Socket Send\n");
+  // printf("Buffer = %s\n", buffer);
+  // printf("Buffer Size = %d\n", cbBuffer);
 
   funcStr = PyUnicode_FromString("send");
   pybuffer = PyBytes_FromStringAndSize(buffer, cbBuffer);
