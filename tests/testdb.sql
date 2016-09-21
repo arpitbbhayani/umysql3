@@ -1,4 +1,4 @@
-use gevent_test;
+use test;
 
 CREATE TABLE `tbltest` (
   `test_id` int(11),
@@ -17,5 +17,3 @@ CREATE TABLE `tblautoincbigint` (
   `test_string` varchar(1024),
   PRIMARY KEY(test_id)  
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
-
-GRANT ALL on gevent_test.* to 'gevent_test'@'localhost' identified by 'gevent_test';
