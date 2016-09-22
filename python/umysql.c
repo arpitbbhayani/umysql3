@@ -595,20 +595,21 @@ int API_resultRowValue(void *result, int column, UMTypeInfo *ti, char *value, si
                 }
                 break;
 
-                //PyFloat
-                case MFTYPE_FLOAT:
-                case MFTYPE_DOUBLE:
-
-                    //FIXME: Too fucking slow
-                    /*
-                     * INVESTIGATE:
-                     * Previous was PyString_FromStringAndSize
-                     * Setting it to PyUnicode_FromStringAndSize
-                     */
-                    PyObject *sobj = PyUnicode_FromStringAndSize((char *) value, cbValue);
-                    valobj = PyFloat_FromString (sobj);
-                    Py_DECREF(sobj);
-                    break;
+            //PyFloat
+            case MFTYPE_FLOAT:
+            case MFTYPE_DOUBLE:
+            {
+                //FIXME: Too fucking slow
+                /*
+                 * INVESTIGATE:
+                 * Previous was PyString_FromStringAndSize
+                 * Setting it to PyUnicode_FromStringAndSize
+                 */
+                PyObject *sobj = PyUnicode_FromStringAndSize((char *) value, cbValue);
+                valobj = PyFloat_FromString (sobj);
+                Py_DECREF(sobj);
+                break;
+            }
 
             case MFTYPE_DATE:
             {
