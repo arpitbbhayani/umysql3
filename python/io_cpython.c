@@ -87,235 +87,219 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <socketdefs.h>
 
 #ifndef TRUE
-#define TRUE 1
+    #define TRUE 1
 #endif
 
 #ifndef FALSE
-#define FALSE 0
+    #define FALSE 0
 #endif
 
 #ifndef snwprintf
-#define snwprintf _snwprintf
+    #define snwprintf _snwprintf
 #endif
 
 #ifndef snprintf
-#define snprintf _snprintf
+    #define snprintf _snprintf
 #endif
 
 #ifndef alloca
-#define alloca _alloca
+    #define alloca _alloca
 #endif
 
 //#define PRINTMARK() fprintf(stderr, "%s: MARK(%d)\n", __FILE__, __LINE__)
 #define PRINTMARK()
 
-void *API_getSocket()
-{
-  /* Create a normal socket */
-  PyObject *sockobj;
-  //FIXME: PyModule will leak
-  static PyObject *sockmodule = NULL;
-  static PyObject *sockclass = NULL;
-  static int once = 1;
+void *API_getSocket() {
+    /* Create a normal socket */
+    PyObject *sockobj;
 
-  if (once)
-  {
-    /*FIXME: References for module or class are never released */
-    sockmodule = PyImport_ImportModule ("socket");
+    //FIXME: PyModule will leak
+    static PyObject *sockmodule = NULL;
+    static PyObject *sockclass = NULL;
+    static int once = 1;
 
-    if (sockmodule == NULL)
-    {
-      PRINTMARK();
-      return NULL;
-    }
-    sockclass = PyObject_GetAttrString(sockmodule, "socket");
+    if (once) {
+        /*FIXME: References for module or class are never released */
+        sockmodule = PyImport_ImportModule ("socket");
 
-    if (sockclass == NULL)
-    {
-      PRINTMARK();
-      return NULL;
-    }
+        if (sockmodule == NULL) {
+            PRINTMARK();
+            return NULL;
+        }
 
-    //FIXME: PyType will leak
-    if (!PyType_Check(sockclass))
-    {
-      PRINTMARK();
-      return NULL;
-    }
+        sockclass = PyObject_GetAttrString(sockmodule, "socket");
+        if (sockclass == NULL) {
+            PRINTMARK();
+            return NULL;
+        }
 
-    if (!PyCallable_Check(sockclass))
-    {
-      PRINTMARK();
-      return NULL;
+        //FIXME: PyType will leak
+        if (!PyType_Check(sockclass)) {
+            PRINTMARK();
+            return NULL;
+        }
+
+        if (!PyCallable_Check(sockclass)) {
+            PRINTMARK();
+            return NULL;
+        }
+
+        once = 0;
     }
 
-    once = 0;
-  }
-
-  PRINTMARK();
-  sockobj = PyObject_Call (sockclass, PyTuple_New(0), NULL);
-  PRINTMARK();
-
-  if (sockobj == NULL)
-  {
     PRINTMARK();
-    return NULL;
-  }
-
-  PRINTMARK();
-  return sockobj;
-}
-
-int API_setTimeout(void *sock, int timeoutSec)
-{
-  PyObject *intobj;
-  PyObject *retobj;
-  PyObject *methodObj;
-
-  PRINTMARK();
-  intobj = PyFloat_FromDouble( (double) timeoutSec);
-
-  /*
-   * PyString_FromString is deprecated and the method settimeout on object
-   * socket expects unicode. so PyUnicode_FromString.
-   */
-  methodObj = PyUnicode_FromString("settimeout");
-  PRINTMARK();
-  retobj = PyObject_CallMethodObjArgs ((PyObject *) sock, methodObj, intobj, NULL);
-  Py_DECREF(intobj);
-  Py_DECREF(methodObj);
-  PRINTMARK();
-
-  if (retobj == NULL)
-  {
-    PyErr_Clear();
-    return 0;
-  }
-
-  Py_DECREF(retobj);
-  return 1;
-
-}
-
-void API_closeSocket(void *sock)
-{
-  PyObject *res = PyObject_CallMethod( (PyObject *) sock, "close", NULL);
-
-  if (res == NULL)
-  {
+    sockobj = PyObject_Call (sockclass, PyTuple_New(0), NULL);
     PRINTMARK();
-    return;
-  }
 
-  Py_DECREF(res);
-}
+    if (sockobj == NULL) {
+        PRINTMARK();
+        return NULL;
+    }
 
-void API_deleteSocket(void *sock)
-{
-  Py_DECREF( (PyObject *) sock);
-}
-
-int API_connectSocket(void *sock, const char *host, int port)
-{
-  PyObject *res;
-  PyObject *addrTuple;
-  PyObject *connectStr;
-
-  PRINTMARK();
-
-  addrTuple = PyTuple_New(2);
-
-  /*
-   * PyString_FromString is deprecated and the method connect on object
-   * socket expects tuple having unicode. so PyUnicode_FromString.
-   */
-  PyTuple_SET_ITEM(addrTuple, 0, PyUnicode_FromString(host));
-  PyTuple_SET_ITEM(addrTuple, 1, PyLong_FromLong(port));
-
-  connectStr = PyUnicode_FromString("connect");
-  res = PyObject_CallMethodObjArgs( (PyObject *) sock, connectStr, addrTuple, NULL);
-
-  Py_DECREF(connectStr);
-  Py_DECREF(addrTuple);
-
-  if (res == NULL)
-  {
     PRINTMARK();
-    return 0;
-  }
-
-  PRINTMARK();
-
-  Py_DECREF(res);
-  return 1;
+    return sockobj;
 }
 
-int API_recvSocket(void *sock, char *buffer, int cbBuffer)
-{
-  PyObject *res;
-  PyObject *bufSize;
-  PyObject *funcStr;
-  int ret;
+int API_setTimeout(void *sock, int timeoutSec) {
+    PyObject *intobj;
+    PyObject *retobj;
+    PyObject *methodObj;
 
-  funcStr = PyUnicode_FromString("recv");
+    PRINTMARK();
+    intobj = PyFloat_FromDouble( (double) timeoutSec);
 
-  /*
-   * PyInt_FromLong is deprecated in favour of PyLong_FromLong
-   */
-  bufSize = PyLong_FromLong(cbBuffer);
-  res = PyObject_CallMethodObjArgs ((PyObject *) sock, funcStr, bufSize, NULL);
-  Py_DECREF(funcStr);
-  Py_DECREF(bufSize);
+    /*
+    * PyString_FromString is deprecated and the method settimeout on object
+    * socket expects unicode. so PyUnicode_FromString.
+    */
+    methodObj = PyUnicode_FromString("settimeout");
 
-  if (res == NULL)
-  {
-    return -1;
-  }
+    PRINTMARK();
+    retobj = PyObject_CallMethodObjArgs ((PyObject *) sock, methodObj, intobj, NULL);
 
-  /*
-   * Since res is a bytes object
-   */
-  ret = (int) PyBytes_GET_SIZE(res);
+    Py_DECREF(intobj);
+    Py_DECREF(methodObj);
 
-  /*
-   * The data received from the socket is byte array.
-   * https://docs.python.org/3/library/socket.html#socket.socket.recv
-   * So PyObject * res ===> PyBytes
-   * So converting it to char * so that it can be copied safely into buffer
-   * https://docs.python.org/3.4/c-api/bytes.html#c.PyBytes_AsString
-  */
-  memcpy (buffer, PyBytes_AsString(res), ret);
-  Py_DECREF(res);
-  return ret;
+    PRINTMARK();
+    if (retobj == NULL) {
+        PyErr_Clear();
+        return 0;
+    }
+
+    Py_DECREF(retobj);
+    return 1;
 }
 
-int API_sendSocket(void *sock, const char *buffer, int cbBuffer)
-{
-  PyObject *res;
-  PyObject *pybuffer;
-  PyObject *funcStr;
-  int ret;
+void API_closeSocket(void *sock) {
+    PyObject *res = PyObject_CallMethod( (PyObject *) sock, "close", NULL);
 
-  funcStr = PyUnicode_FromString("send");
+    if (res == NULL) {
+        PRINTMARK();
+        return;
+    }
 
-  /*
-   * Converting const char * buffer to Python Bytes because
-   * The code below calls the method "send" of the object of type "socket"
-   * https://docs.python.org/3/library/socket.html#socket.socket.send
-   * The method sends the "bytes" over the socket hence converting the
-   * const char * received into PyBytes
-  */
-  pybuffer = PyBytes_FromStringAndSize(buffer, cbBuffer);
-  res = PyObject_CallMethodObjArgs ((PyObject *) sock, funcStr, pybuffer, NULL);
-  Py_DECREF(funcStr);
-  Py_DECREF(pybuffer);
+    Py_DECREF(res);
+}
 
-  if (res == NULL)
-  {
-    return -1;
-  }
+void API_deleteSocket(void *sock) {
+    Py_DECREF( (PyObject *) sock);
+}
 
-  ret = (int) PyLong_AsLong(res);
-  Py_DECREF(res);
-  return ret;
+int API_connectSocket(void *sock, const char *host, int port) {
+    PyObject *res;
+    PyObject *addrTuple;
+    PyObject *connectStr;
+
+    PRINTMARK();
+
+    addrTuple = PyTuple_New(2);
+
+    /*
+    * PyString_FromString is deprecated and the method connect on object
+    * socket expects tuple having unicode. so PyUnicode_FromString.
+    */
+    PyTuple_SET_ITEM(addrTuple, 0, PyUnicode_FromString(host));
+    PyTuple_SET_ITEM(addrTuple, 1, PyLong_FromLong(port));
+
+    connectStr = PyUnicode_FromString("connect");
+    res = PyObject_CallMethodObjArgs( (PyObject *) sock, connectStr, addrTuple, NULL);
+
+    Py_DECREF(connectStr);
+    Py_DECREF(addrTuple);
+
+    if (res == NULL) {
+        PRINTMARK();
+        return 0;
+    }
+
+    PRINTMARK();
+
+    Py_DECREF(res);
+    return 1;
+}
+
+int API_recvSocket(void *sock, char *buffer, int cbBuffer) {
+    PyObject *res;
+    PyObject *bufSize;
+    PyObject *funcStr;
+    int ret;
+
+    funcStr = PyUnicode_FromString("recv");
+
+    /*
+    * PyInt_FromLong is deprecated in favour of PyLong_FromLong
+    */
+    bufSize = PyLong_FromLong(cbBuffer);
+    res = PyObject_CallMethodObjArgs ((PyObject *) sock, funcStr, bufSize, NULL);
+    Py_DECREF(funcStr);
+    Py_DECREF(bufSize);
+
+    if (res == NULL) {
+        return -1;
+    }
+
+    /*
+     * Since res is a bytes object
+     */
+    ret = (int) PyBytes_GET_SIZE(res);
+
+    /*
+     * The data received from the socket is byte array.
+     * https://docs.python.org/3/library/socket.html#socket.socket.recv
+     * So PyObject * res ===> PyBytes
+     * So converting it to char * so that it can be copied safely into buffer
+     * https://docs.python.org/3.4/c-api/bytes.html#c.PyBytes_AsString
+     */
+    memcpy (buffer, PyBytes_AsString(res), ret);
+    Py_DECREF(res);
+    return ret;
+}
+
+int API_sendSocket(void *sock, const char *buffer, int cbBuffer) {
+    PyObject *res;
+    PyObject *pybuffer;
+    PyObject *funcStr;
+    int ret;
+
+    funcStr = PyUnicode_FromString("send");
+
+    /*
+     * Converting const char * buffer to Python Bytes because
+     * The code below calls the method "send" of the object of type "socket"
+     * https://docs.python.org/3/library/socket.html#socket.socket.send
+     * The method sends the "bytes" over the socket hence converting the
+     * const char * received into PyBytes
+     */
+    pybuffer = PyBytes_FromStringAndSize(buffer, cbBuffer);
+    res = PyObject_CallMethodObjArgs ((PyObject *) sock, funcStr, pybuffer, NULL);
+    Py_DECREF(funcStr);
+    Py_DECREF(pybuffer);
+
+    if (res == NULL) {
+        return -1;
+    }
+
+    ret = (int) PyLong_AsLong(res);
+    Py_DECREF(res);
+    return ret;
 }
