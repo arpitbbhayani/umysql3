@@ -125,7 +125,7 @@ module1 = Extension('umysql3',
                 define_macros=[('WIN32_LEAN_AND_MEAN', None)])
 
 setup (name = 'umysql3',
-       version = "0.0.4",
+       version = "0.1",
        description = "Ultra fast MySQL driver for Python",
        ext_modules = [module1],
        author="Arpit Bhayani",
