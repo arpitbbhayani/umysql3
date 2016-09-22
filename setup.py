@@ -125,7 +125,7 @@ module1 = Extension('umysql3',
                 define_macros=[('WIN32_LEAN_AND_MEAN', None)])
 
 setup (name = 'umysql3',
-       version = "0.1",
+       version = "0.2",
        description = "Ultra fast MySQL driver for Python",
        ext_modules = [module1],
        author="Arpit Bhayani",
@@ -133,6 +133,6 @@ setup (name = 'umysql3',
        download_url="http://github.com/arpitbbhayani/ultramysql",
        license="BSD License",
        platforms=['any'],
-	   url="http://github.com/arpitbbhayani/ultramysql",
+       url="http://github.com/arpitbbhayani/ultramysql",
        classifiers=CLASSIFIERS,
-	   )
+)
