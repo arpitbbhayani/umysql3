@@ -611,6 +611,7 @@ int API_resultRowValue(void *result, int column, UMTypeInfo *ti, char *value, si
                     break;
 
             case MFTYPE_DATE:
+            {
                 int year;
                 int month;
                 int day;
@@ -631,9 +632,11 @@ int API_resultRowValue(void *result, int column, UMTypeInfo *ti, char *value, si
 
                 valobj = PyDate_FromDate (year, month, day);
                 break;
+            }
 
             case MFTYPE_TIMESTAMP:
             case MFTYPE_DATETIME:
+            {
                 int year;
                 int month;
                 int day;
@@ -667,6 +670,7 @@ int API_resultRowValue(void *result, int column, UMTypeInfo *ti, char *value, si
 
                 valobj = PyDateTime_FromDateAndTime (year, month, day, hour, minute, second, 0);
                 break;
+            }
 
             // We ignore these
             case MFTYPE_TIME:
